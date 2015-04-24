@@ -1,9 +1,6 @@
-package com.myretail.myretail;
+package com.myretail.myretail.adoptors;
 
 
-
-import java.util.HashMap;
-import java.util.List;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -13,7 +10,12 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-class ExpandableListAdaptor extends BaseExpandableListAdapter {
+import com.myretail.myretail.R;
+
+import java.util.HashMap;
+import java.util.List;
+
+public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<String> listHeader;
@@ -21,7 +23,7 @@ class ExpandableListAdaptor extends BaseExpandableListAdapter {
 
     private HashMap<String, List<String>> listItem;
 
-    public ExpandableListAdaptor(Context context, List<String> listHeader,
+    public ExpandableListAdapter(Context context, List<String> listHeader,
                                  HashMap<String, List<String>> listChildData) {
         this.context = context;
         this.listHeader = listHeader;

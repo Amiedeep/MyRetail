@@ -3,14 +3,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="#f4f4f4" >
+    android:background="@drawable/background"
+  >
 
     <TextView
         android:layout_width="@dimen/textview_width"
         android:layout_height="@dimen/textview_height"
-        android:background="#999966"
+        android:background="@drawable/header"
         android:text="MyRetail"
         android:id="@+id/header"
+        android:textStyle="bold"
         android:textSize="@dimen/font_size"
     />
     <ExpandableListView

@@ -1,18 +1,21 @@
-package com.myretail.myretail;
+package com.myretail.myretail.activities;
 
 
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.ExpandableListView;
+
+import com.myretail.myretail.adoptors.ExpandableListAdapter;
+import com.myretail.myretail.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
 
-public class MainActivity extends Activity {
+public class Main extends Activity {
 
-    ExpandableListAdapter listAdapter;
+    android.widget.ExpandableListAdapter listAdapter;
     ExpandableListView listView;
     List<String> listHeader;
     HashMap<String, List<String>> listItem;
@@ -21,19 +24,16 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
         listView = (ExpandableListView) findViewById(R.id.categoryList);
         prepareListData();
-
-        listAdapter = new ExpandableListAdaptor(this, listHeader, listItem);
-
+        listAdapter = new ExpandableListAdapter(this, listHeader, listItem);
         listView.setAdapter(listAdapter);
+        
     }
 
     private void prepareListData() {
         listHeader = new ArrayList<String>();
         listItem = new HashMap<String, List<String>>();
-
         listHeader.add("Electronics");
         listHeader.add("Furniture");
         listHeader.add("Clothing");
