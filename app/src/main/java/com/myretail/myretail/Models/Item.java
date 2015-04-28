@@ -10,13 +10,17 @@ public class Item {
     private String imageUrl;
     private Long categoryId;
 
-    public Item(Long id, String name, String detail, String price, String imageUrl, String categoryId) {
-        this.id = id;
-        this.name = name;
+    public Item(Long id, String name, String detail, String price, String imageUrl, Long categoryId) {
+        this(id, name, categoryId);
         this.detail = detail;
         this.imageUrl = imageUrl;
-        this.categoryId = Long.parseLong(categoryId);
         this.price = BigDecimal.valueOf(Double.parseDouble(price));
+    }
+
+    public Item(Long id, String name, Long categoryId) {
+        this.id = id;
+        this.name = name;
+        this.categoryId = categoryId;
     }
 
     public Long getId() {

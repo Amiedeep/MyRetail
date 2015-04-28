@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ExpandableListView;
 
+import com.myretail.myretail.Models.Category;
+import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
 import com.myretail.myretail.adopters.ExpandableListAdapter;
 import com.myretail.myretail.db_helper.DataBaseHelper;
@@ -15,6 +17,8 @@ import com.myretail.myretail.db_helper.DataBaseHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static java.util.Arrays.asList;
 
 public class MainActivity extends Activity {
 
@@ -52,31 +56,20 @@ public class MainActivity extends Activity {
 
 
     private void prepareListData()  {
-
         listHeader = new ArrayList<String>();
         listItem = new HashMap<String,List<String>>();
 
-        listHeader.add("Electronics");
-        listHeader.add("Furniture");
-        listHeader.add("Clothing");
+        List<Category> categories = DataBaseHelper.getInstance(this).getCategories();
 
+        for (Category category : categories) {
+            listHeader.add(category.getName());
+            List<String> items = new ArrayList<>();
 
-        List<String> electronics = new ArrayList<>();
-        electronics.add("TV");
-        electronics.add("MicroWave");
+            for (Item item : category.getItems()) {
+                items.add(item.getName());
+            }
 
-
-        List<String> furniture = new ArrayList<>();
-        furniture.add("Chairs");
-        furniture.add("Table");
-
-        List<String> clothing = new ArrayList<>();
-        clothing.add("Jeans");
-        clothing.add("T-Shirt");
-
-        listItem.put(listHeader.get(0), electronics);
-        listItem.put(listHeader.get(1), furniture);
-        listItem.put(listHeader.get(2), clothing);
+            listItem.put(category.getName(), items);
+        }
     }
-
 }

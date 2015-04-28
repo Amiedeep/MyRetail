@@ -5,9 +5,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.myretail.myretail.Models.Category;
 import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.tables.CategoryTable;
 import com.myretail.myretail.tables.ItemTable;
+
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 
 public class DataBaseHelper {
@@ -37,6 +44,55 @@ public class DataBaseHelper {
         createAndSeedItemsTable();
     }
 
+    public List<Category> getCategories() {
+        Cursor categories = database.query(CategoryTable.TABLE_NAME, CategoryTable.ALL_COLUMNS, null, null, null, null, null, null);
+        if (categories == null) return asList();
+
+        List<Category> fetchedCategories = new ArrayList<>();
+        categories.moveToFirst();
+
+        do {
+            String name = categories.getString(categories.getColumnIndex(CategoryTable.NAME));
+            Long id = categories.getLong(categories.getColumnIndex(CategoryTable.ID));
+            fetchedCategories.add(new Category(id, name, getItems(id)));
+
+        } while(categories.moveToNext());
+
+        return fetchedCategories;
+    }
+
+    public List<Item> getItems(Long categoryId) {
+        Cursor items = database.query(ItemTable.TABLE_NAME, ItemTable.ALL_COLUMNS, ItemTable.CATEGORY_ID + "=" + categoryId.intValue(), null, null, null, null, null);
+        if (items == null) return null;
+
+        List<Item> fetchedItems = new ArrayList<>();
+        items.moveToFirst();
+
+        do{
+            Long id = items.getLong(items.getColumnIndex(ItemTable.ID));
+            String name = items.getString(items.getColumnIndex(ItemTable.NAME));
+
+            fetchedItems.add(new Item(id, name, categoryId));
+        }
+        while(items.moveToNext());
+
+        return fetchedItems;
+    }
+
+    public Item getItem(Long id) {
+        Cursor item = database.query(ItemTable.TABLE_NAME, ItemTable.ALL_COLUMNS, ItemTable.ID + "=" + id.intValue(), null, null, null, null, null);
+        if (item == null) return null;
+
+        item.moveToNext();
+        String name = item.getString(item.getColumnIndex(ItemTable.NAME));
+        String imageUrl = item.getString(item.getColumnIndex(ItemTable.IMAGE_URL));
+        Long categoryId = item.getLong(item.getColumnIndex(ItemTable.CATEGORY_ID));
+        String detail = item.getString(item.getColumnIndex(ItemTable.DETAIL));
+        String price = item.getString(item.getColumnIndex(ItemTable.PRICE));
+
+        return new Item(id, name, detail, price, imageUrl, categoryId);
+    }
+
     private void createAndSeedItemsTable() {
         database.execSQL(ItemTable.DROP_QUERY);
         database.execSQL(ItemTable.CREATE_QUERY);
@@ -59,21 +115,6 @@ public class DataBaseHelper {
         database.execSQL("insert into " + CategoryTable.TABLE_NAME  + " values(20, 'Furniture')");
         database.execSQL("insert into " + CategoryTable.TABLE_NAME  + " values(30, 'Clothes')");
     }
-
-    public Item getItem(Long id) {
-        Cursor item = database.query(ItemTable.TABLE_NAME, ItemTable.ALL_COLUMNS, ItemTable.ID + "=" + id.intValue(), null, null, null, null, null);
-        if (item == null) return null;
-
-        item.moveToNext();
-        String name = item.getString(item.getColumnIndex(ItemTable.NAME));
-        String imageUrl = item.getString(item.getColumnIndex(ItemTable.IMAGE_URL));
-        String categoryId = item.getString(item.getColumnIndex(ItemTable.CATEGORY_ID));
-        String detail = item.getString(item.getColumnIndex(ItemTable.DETAIL));
-        String price = item.getString(item.getColumnIndex(ItemTable.PRICE));
-
-        return new Item(id, name, detail, price, imageUrl, categoryId);
-    }
-
 
     private class DataBaseOpenHelper extends SQLiteOpenHelper {
 
