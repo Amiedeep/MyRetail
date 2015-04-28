@@ -5,9 +5,9 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
 import com.myretail.myretail.db_helper.DataBaseHelper;
-import com.myretail.myretail.models.Item;
 import com.squareup.picasso.Picasso;
 
 
