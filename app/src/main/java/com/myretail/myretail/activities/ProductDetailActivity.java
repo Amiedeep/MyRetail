@@ -1,4 +1,4 @@
-package com.myretail.myretail.activitis;
+package com.myretail.myretail.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -26,9 +26,9 @@ public class ProductDetailActivity extends Activity {
         img = (ImageView) findViewById(R.id.image);
         detail = (TextView) findViewById(R.id.detail);
 
-//        String name = getIntent().getStringExtra("items");
+        Long itemId = getIntent().getLongExtra("itemId", 1l);
         DataBaseHelper dataBaseHelper = DataBaseHelper.getInstance(this);
-        Item item = dataBaseHelper.getItem(1l);
+        Item item = dataBaseHelper.getItem(itemId);
 
         Picasso.with(getApplicationContext()).load(item.getImageUrl()).into(img);
         this.item.setText(item.getName());

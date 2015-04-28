@@ -1,4 +1,4 @@
-package com.myretail.myretail.adopters;
+package com.myretail.myretail.adapters;
 
 
 

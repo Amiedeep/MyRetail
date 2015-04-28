@@ -1,4 +1,4 @@
-package com.myretail.myretail.activitis;
+package com.myretail.myretail.activities;
 
 
 import android.app.Activity;
@@ -11,14 +11,12 @@ import android.widget.ExpandableListView;
 import com.myretail.myretail.Models.Category;
 import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
-import com.myretail.myretail.adopters.ExpandableListAdapter;
+import com.myretail.myretail.adapters.ExpandableListAdapter;
 import com.myretail.myretail.db_helper.DataBaseHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 public class MainActivity extends Activity {
 
@@ -36,7 +34,7 @@ public class MainActivity extends Activity {
         dataBaseHelper.setUpDB();
 
         listView = (ExpandableListView) findViewById(R.id.categoryList);
-        prepareListData();
+        generateExpandableList();
 
         listAdapter = new ExpandableListAdapter(this, listHeader, listItem);
         listView.setAdapter(listAdapter);
@@ -55,7 +53,7 @@ public class MainActivity extends Activity {
     }
 
 
-    private void prepareListData()  {
+    private void generateExpandableList()  {
         listHeader = new ArrayList<String>();
         listItem = new HashMap<String,List<String>>();
 
