@@ -69,7 +69,7 @@ public class DataBaseHelper {
         database.execSQL(ItemTable.DROP_QUERY);
         database.execSQL(ItemTable.CREATE_QUERY);
 
-        insertItem(1l, "T.V", "3000", "LCD TV", imageToByteArray(R.drawable.tv), 10l);
+        insertItem(1l, "T.V", "3000", "LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV", imageToByteArray(R.drawable.tv), 10l);
         insertItem(2l, "Microwave", "4000", "microwave", imageToByteArray(R.drawable.microwave), 10l);
 
         insertItem(3l, "Chair", "1000", "Chair", imageToByteArray(R.drawable.chair), 20l);

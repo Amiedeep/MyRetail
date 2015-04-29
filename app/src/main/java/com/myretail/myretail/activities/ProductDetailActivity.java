@@ -11,27 +11,23 @@ import com.myretail.myretail.db_helper.DataBaseHelper;
 
 
 public class ProductDetailActivity extends Activity {
-    private TextView item;
-    private TextView price;
-    private ImageView image;
-    private TextView detail;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.product_detail);
-        item = (TextView) findViewById(R.id.item);
-        price = (TextView)findViewById(R.id.price);
-        image = (ImageView) findViewById(R.id.image);
-        detail = (TextView) findViewById(R.id.detail);
+        TextView item1 = (TextView) findViewById(R.id.item);
+        TextView price = (TextView) findViewById(R.id.price);
+        ImageView image = (ImageView) findViewById(R.id.image);
+        TextView detail = (TextView) findViewById(R.id.detail);
 
         Long itemId = getIntent().getLongExtra("itemId", 0l);
         DataBaseHelper dataBaseHelper = DataBaseHelper.getInstance(this);
         Item item = dataBaseHelper.getItem(itemId);
 
         image.setImageBitmap(item.getImage());
-        this.item.setText(item.getName());
-        price.setText(item.getPrice().toString());
+        item1.setText(item.getName());
+        price.setText("Rs. " + item.getPrice().toString());
         detail.setText(item.getDetail());
     }
 }
