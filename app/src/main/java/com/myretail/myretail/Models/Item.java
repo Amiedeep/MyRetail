@@ -1,5 +1,8 @@
 package com.myretail.myretail.Models;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import java.math.BigDecimal;
 
 public class Item {
@@ -7,13 +10,13 @@ public class Item {
     private Long id;
     private String name;
     private String detail;
-    private String imageUrl;
+    private byte[] image;
     private Long categoryId;
 
-    public Item(Long id, String name, String detail, String price, String imageUrl, Long categoryId) {
+    public Item(Long id, String name, String detail, String price, byte[] image, Long categoryId) {
         this(id, name, categoryId);
         this.detail = detail;
-        this.imageUrl = imageUrl;
+        this.image = image;
         this.price = BigDecimal.valueOf(Double.parseDouble(price));
     }
 
@@ -35,7 +38,11 @@ public class Item {
         return detail;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public Bitmap getImage() {
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+
+    public BigDecimal getPrice() {
+        return price;
     }
 }

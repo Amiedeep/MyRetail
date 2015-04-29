@@ -1,26 +1,24 @@
 package com.myretail.myretail.db_helper;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
-import com.myretail.myretail.Models.Category;
 import com.myretail.myretail.Models.Item;
+import com.myretail.myretail.R;
 import com.myretail.myretail.tables.CategoryTable;
 import com.myretail.myretail.tables.ItemTable;
 
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-
-import static java.util.Arrays.asList;
+import java.io.ByteArrayOutputStream;
 
 
 public class DataBaseHelper {
 
     private final String DATA_BASE = "retail.db";
-    private static final String DB_PATH = "/data/";
     private final Integer DB_VERSION = 1;
     private Context context;
     private SQLiteDatabase database;
@@ -44,39 +42,13 @@ public class DataBaseHelper {
         createAndSeedItemsTable();
     }
 
-    public List<Category> getCategories() {
-        Cursor categories = database.query(CategoryTable.TABLE_NAME, CategoryTable.ALL_COLUMNS, null, null, null, null, null, null);
-        if (categories == null) return asList();
-
-        List<Category> fetchedCategories = new ArrayList<>();
-        categories.moveToFirst();
-
-        do {
-            String name = categories.getString(categories.getColumnIndex(CategoryTable.NAME));
-            Long id = categories.getLong(categories.getColumnIndex(CategoryTable.ID));
-            fetchedCategories.add(new Category(id, name, getItems(id)));
-
-        } while(categories.moveToNext());
-
-        return fetchedCategories;
+    public Cursor getCategoriesCursor() {
+        String query = "SELECT * FROM " + CategoryTable.TABLE_NAME;
+        return database.rawQuery(query, null);
     }
 
-    public List<Item> getItems(Long categoryId) {
-        Cursor items = database.query(ItemTable.TABLE_NAME, ItemTable.ALL_COLUMNS, ItemTable.CATEGORY_ID + "=" + categoryId.intValue(), null, null, null, null, null);
-        if (items == null) return null;
-
-        List<Item> fetchedItems = new ArrayList<>();
-        items.moveToFirst();
-
-        do{
-            Long id = items.getLong(items.getColumnIndex(ItemTable.ID));
-            String name = items.getString(items.getColumnIndex(ItemTable.NAME));
-
-            fetchedItems.add(new Item(id, name, categoryId));
-        }
-        while(items.moveToNext());
-
-        return fetchedItems;
+    public Cursor getItemsCursor(Long categoryId) {
+        return database.query(ItemTable.TABLE_NAME, ItemTable.ALL_COLUMNS, ItemTable.CATEGORY_ID + "=" + categoryId.intValue(), null, null, null, null, null);
     }
 
     public Item getItem(Long id) {
@@ -85,26 +57,45 @@ public class DataBaseHelper {
 
         item.moveToNext();
         String name = item.getString(item.getColumnIndex(ItemTable.NAME));
-        String imageUrl = item.getString(item.getColumnIndex(ItemTable.IMAGE_URL));
+        byte[] image = item.getBlob(item.getColumnIndex(ItemTable.IMAGE));
         Long categoryId = item.getLong(item.getColumnIndex(ItemTable.CATEGORY_ID));
         String detail = item.getString(item.getColumnIndex(ItemTable.DETAIL));
         String price = item.getString(item.getColumnIndex(ItemTable.PRICE));
 
-        return new Item(id, name, detail, price, imageUrl, categoryId);
+        return new Item(id, name, detail, price, image, categoryId);
     }
 
     private void createAndSeedItemsTable() {
         database.execSQL(ItemTable.DROP_QUERY);
         database.execSQL(ItemTable.CREATE_QUERY);
 
-        database.execSQL("insert into " + ItemTable.TABLE_NAME  + " values(1, 'T.V', 3000, 'awesome T.V', 'http://i.imgur.com/DvpvklR.png', 10)");
-        database.execSQL("insert into " + ItemTable.TABLE_NAME  + " values(2, 'Microwave', 4000, 'awesome T.V', 'http://i.imgur.com/DvpvklR.png', 10)");
+        insertItem(1l, "T.V", "3000", "LCD TV", imageToByteArray(R.drawable.tv), 10l);
+        insertItem(2l, "Microwave", "4000", "microwave", imageToByteArray(R.drawable.microwave), 10l);
 
-        database.execSQL("insert into " + ItemTable.TABLE_NAME  + " values(3, 'Chair', 1000, 'awesome T.V', 'http://i.imgur.com/DvpvklR.png', 20)");
-        database.execSQL("insert into " + ItemTable.TABLE_NAME  + " values(4, 'Table', 5000, 'awesome T.V', 'http://i.imgur.com/DvpvklR.png', 20)");
+        insertItem(3l, "Chair", "1000", "Chair", imageToByteArray(R.drawable.chair), 20l);
+        insertItem(4l, "Table", "5000", "Table", imageToByteArray(R.drawable.table), 20l);
 
-        database.execSQL("insert into " + ItemTable.TABLE_NAME  + " values(5, 'T-Shirt', 800, 'awesome T.V', 'http://i.imgur.com/DvpvklR.png', 30)");
-        database.execSQL("insert into " + ItemTable.TABLE_NAME  + " values(6, 'Jeans', 1500, 'awesome T.V', 'http://i.imgur.com/DvpvklR.png', 30)");
+        insertItem(5l, "T-Shirt", "800", "t-shirt", imageToByteArray(R.drawable.t_shirt), 30l);
+        insertItem(6l, "Jeans", "1500", "jeans", imageToByteArray(R.drawable.jeans), 30l);
+    }
+
+    private void insertItem(Long id, String name, String price, String detail, byte[] image, Long categoryId) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ItemTable.NAME, name);
+        contentValues.put(ItemTable.ID, id);
+        contentValues.put(ItemTable.PRICE, price);
+        contentValues.put(ItemTable.DETAIL, detail);
+        contentValues.put(ItemTable.IMAGE, image);
+        contentValues.put(ItemTable.CATEGORY_ID, categoryId);
+
+        database.insert(ItemTable.TABLE_NAME, null, contentValues);
+    }
+
+    private byte[] imageToByteArray(int imageResource) {
+        Bitmap b = BitmapFactory.decodeResource(this.context.getResources(), imageResource);
+        ByteArrayOutputStream bos=new ByteArrayOutputStream();
+        b.compress(Bitmap.CompressFormat.PNG, 100, bos);
+        return bos.toByteArray();
     }
 
     private void createAndSeedCategoriesTable() {

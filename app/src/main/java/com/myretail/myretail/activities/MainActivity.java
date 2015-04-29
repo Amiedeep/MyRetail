@@ -4,47 +4,52 @@ package com.myretail.myretail.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.SimpleCursorTreeAdapter;
 
-import com.myretail.myretail.Models.Category;
-import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
-import com.myretail.myretail.adapters.ExpandableListAdapter;
 import com.myretail.myretail.db_helper.DataBaseHelper;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import com.myretail.myretail.tables.CategoryTable;
+import com.myretail.myretail.tables.ItemTable;
 
 public class MainActivity extends Activity {
 
-    private ExpandableListAdapter listAdapter;
+    private MyExpandableListAdapter listAdapter;
     private ExpandableListView listView;
-    private List<String> listHeader;
-    private HashMap<String, List<String>> listItem;
+    private DataBaseHelper dataBaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        DataBaseHelper dataBaseHelper = DataBaseHelper.getInstance(this.getBaseContext());
+        dataBaseHelper = DataBaseHelper.getInstance(this.getBaseContext());
         dataBaseHelper.setUpDB();
 
         listView = (ExpandableListView) findViewById(R.id.categoryList);
-        generateExpandableList();
 
-        listAdapter = new ExpandableListAdapter(this, listHeader, listItem);
+        String[] groupFrom = { CategoryTable.NAME };
+        int[] groupTo = { R.id.listHeader };
+
+        String[] childFrom = { ItemTable.NAME };
+        int[] childTo = { R.id.listItem };
+
+        Cursor categoriesCursor = dataBaseHelper.getCategoriesCursor();
+        categoriesCursor.moveToFirst();
+
+        listAdapter = new MyExpandableListAdapter(categoriesCursor, getApplicationContext(),
+                R.layout.list_group, R.layout.list_item, groupFrom, groupTo, childFrom, childTo);
+
         listView.setAdapter(listAdapter);
 
-        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener(){
+        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 Context context = getApplicationContext();
-                Intent intent = new Intent(context, ProductDetailActivity.class).putExtra("items",
-                                String.valueOf(listAdapter.getChild(groupPosition,childPosition)));
+                Intent intent = new Intent(context, ProductDetailActivity.class).putExtra("itemId", id);
                 startActivity(intent);
                 return false;
             }
@@ -52,22 +57,19 @@ public class MainActivity extends Activity {
 
     }
 
+    public class MyExpandableListAdapter extends SimpleCursorTreeAdapter {
+        public MyExpandableListAdapter(Cursor cursor, Context context,int groupLayout,
+                                       int childLayout, String[] groupFrom, int[] groupTo, String[] childrenFrom,
+                                       int[] childrenTo) {
+            super(context, cursor, groupLayout, groupFrom, groupTo,
+                    childLayout, childrenFrom, childrenTo);
+        }
 
-    private void generateExpandableList()  {
-        listHeader = new ArrayList<String>();
-        listItem = new HashMap<String,List<String>>();
-
-        List<Category> categories = DataBaseHelper.getInstance(this).getCategories();
-
-        for (Category category : categories) {
-            listHeader.add(category.getName());
-            List<String> items = new ArrayList<>();
-
-            for (Item item : category.getItems()) {
-                items.add(item.getName());
-            }
-
-            listItem.put(category.getName(), items);
+        @Override
+        protected Cursor getChildrenCursor(Cursor groupCursor) {
+            Cursor childCursor = dataBaseHelper.getItemsCursor(groupCursor.getLong(groupCursor.getColumnIndex(CategoryTable.ID)));
+            childCursor.moveToFirst();
+            return childCursor;
         }
     }
 }
