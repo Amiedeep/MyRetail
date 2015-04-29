@@ -7,13 +7,22 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.util.Log;
 
 import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
+import com.myretail.myretail.tables.CartTable;
 import com.myretail.myretail.tables.CategoryTable;
 import com.myretail.myretail.tables.ItemTable;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
+
+import static com.myretail.myretail.db_helper.DatabaseManager.*;
 
 
 public class DataBaseHelper {
@@ -28,8 +37,8 @@ public class DataBaseHelper {
         this.context = baseContext;
     }
 
-    public static DataBaseHelper getInstance(Context context){
-        if(dataBaseHelper == null){
+    public static DataBaseHelper getInstance(Context context) {
+        if (dataBaseHelper == null) {
             dataBaseHelper = new DataBaseHelper(context);
         }
 
@@ -38,8 +47,14 @@ public class DataBaseHelper {
 
     public void setUpDB() {
         database = new DataBaseOpenHelper(this.context).getWritableDatabase();
-        createAndSeedCategoriesTable();
-        createAndSeedItemsTable();
+        if (isBackupAvailable()) {
+            restoreDB();
+        } else {
+            createAndSeedCategoriesTable();
+            createAndSeedItemsTable();
+            createCartTable();
+            backupDB();
+        }
     }
 
     public Cursor getCategoriesCursor() {
@@ -63,6 +78,17 @@ public class DataBaseHelper {
         String price = item.getString(item.getColumnIndex(ItemTable.PRICE));
 
         return new Item(id, name, detail, price, image, categoryId);
+    }
+
+    public void addItemToCart(Long id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CartTable.ID, id);
+        database.insert(CartTable.TABLE_NAME, null, contentValues);
+    }
+
+    private void createCartTable() {
+        database.execSQL(CartTable.DROP_QUERY);
+        database.execSQL(CartTable.CREATE_QUERY);
     }
 
     private void createAndSeedItemsTable() {
@@ -93,7 +119,7 @@ public class DataBaseHelper {
 
     private byte[] imageToByteArray(int imageResource) {
         Bitmap b = BitmapFactory.decodeResource(this.context.getResources(), imageResource);
-        ByteArrayOutputStream bos=new ByteArrayOutputStream();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         b.compress(Bitmap.CompressFormat.PNG, 100, bos);
         return bos.toByteArray();
     }
@@ -102,9 +128,9 @@ public class DataBaseHelper {
         database.execSQL(CategoryTable.DROP_QUERY);
         database.execSQL(CategoryTable.CREATE_QUERY);
 
-        database.execSQL("insert into " + CategoryTable.TABLE_NAME  + " values(10, 'Electronics')");
-        database.execSQL("insert into " + CategoryTable.TABLE_NAME  + " values(20, 'Furniture')");
-        database.execSQL("insert into " + CategoryTable.TABLE_NAME  + " values(30, 'Clothes')");
+        database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(10, 'Electronics')");
+        database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(20, 'Furniture')");
+        database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(30, 'Clothes')");
     }
 
     private class DataBaseOpenHelper extends SQLiteOpenHelper {

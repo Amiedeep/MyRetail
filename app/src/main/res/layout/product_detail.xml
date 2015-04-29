@@ -14,14 +14,6 @@
         android:text="MyRetail"
         android:textSize="@dimen/font_size" />
 
-    <ImageView
-        android:layout_width="37dp"
-        android:layout_height="37dp"
-        android:id="@+id/icon"
-        android:layout_alignEnd="@+id/header"
-        android:background="@drawable/ic_icon"
-        tools:ignore="RtlCompat" />
-
     <TextView
         android:layout_width="@dimen/textview_width"
         android:layout_height="@dimen/textview_height"
@@ -62,5 +54,15 @@
         android:layout_alignLeft="@+id/price"
         android:layout_alignStart="@+id/price"
         android:textIsSelectable="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add to cart"
+        android:id="@+id/add_to_cart_button"
+        android:layout_above="@+id/item"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
