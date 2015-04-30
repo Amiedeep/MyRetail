@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
 
@@ -55,6 +56,17 @@ public class MainActivity extends Activity {
             }
         });
 
+
+        Button myCartButton = (Button) findViewById(R.id.my_cart_button);
+
+        myCartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Context context = getApplicationContext();
+                Intent intent = new Intent(context, MyCartActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public class MyExpandableListAdapter extends SimpleCursorTreeAdapter {

@@ -7,8 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
-import android.util.Log;
 
 import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
@@ -17,12 +15,12 @@ import com.myretail.myretail.tables.CategoryTable;
 import com.myretail.myretail.tables.ItemTable;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.myretail.myretail.db_helper.DatabaseManager.*;
+import static com.myretail.myretail.db_helper.DatabaseManager.backupDB;
+import static com.myretail.myretail.db_helper.DatabaseManager.isBackupAvailable;
+import static com.myretail.myretail.db_helper.DatabaseManager.restoreDB;
 
 
 public class DataBaseHelper {
@@ -76,6 +74,8 @@ public class DataBaseHelper {
         Long categoryId = item.getLong(item.getColumnIndex(ItemTable.CATEGORY_ID));
         String detail = item.getString(item.getColumnIndex(ItemTable.DETAIL));
         String price = item.getString(item.getColumnIndex(ItemTable.PRICE));
+
+        item.close();
 
         return new Item(id, name, detail, price, image, categoryId);
     }
@@ -131,6 +131,21 @@ public class DataBaseHelper {
         database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(10, 'Electronics')");
         database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(20, 'Furniture')");
         database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(30, 'Clothes')");
+    }
+
+    public List<Item> getCartItems() {
+        Cursor cursor = database.query(CartTable.TABLE_NAME, CartTable.ALL_COLUMNS, null, null, null, null, null, null);
+        List<Item> items = new ArrayList<>();
+        if(cursor.getCount() == 0) return items;
+        cursor.moveToFirst();
+
+        do {
+            Long itemId = cursor.getLong(cursor.getColumnIndex(CartTable.ID));
+            items.add(getItem(itemId));
+        } while (cursor.moveToNext());
+
+        cursor.close();
+        return items;
     }
 
     private class DataBaseOpenHelper extends SQLiteOpenHelper {
