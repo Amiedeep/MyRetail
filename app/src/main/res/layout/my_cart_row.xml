@@ -37,8 +37,17 @@
         android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
         android:theme="@style/AppTheme"
         android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/my_cart_item_delete"
+        android:layout_toStartOf="@+id/my_cart_item_delete" />
+
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/my_cart_item_delete"
+        android:background="@drawable/delete"
+        android:layout_gravity="right"
+        android:layout_weight="0.39"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="29dp"
-        android:layout_marginEnd="29dp" />
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

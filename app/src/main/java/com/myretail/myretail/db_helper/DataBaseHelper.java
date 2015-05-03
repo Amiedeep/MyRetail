@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
@@ -82,7 +83,7 @@ public class DataBaseHelper {
 
     public void addItemToCart(Long id) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(CartTable.ID, id);
+        contentValues.put(CartTable.ITEM_ID, id);
         database.insert(CartTable.TABLE_NAME, null, contentValues);
     }
 
@@ -133,19 +134,14 @@ public class DataBaseHelper {
         database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(30, 'Clothes')");
     }
 
-    public List<Item> getCartItems() {
-        Cursor cursor = database.query(CartTable.TABLE_NAME, CartTable.ALL_COLUMNS, null, null, null, null, null, null);
-        List<Item> items = new ArrayList<>();
-        if(cursor.getCount() == 0) return items;
-        cursor.moveToFirst();
+    public Cursor getCartCursor() {
+        return database.rawQuery("select * from " + CartTable.TABLE_NAME, null);
+    }
 
-        do {
-            Long itemId = cursor.getLong(cursor.getColumnIndex(CartTable.ID));
-            items.add(getItem(itemId));
-        } while (cursor.moveToNext());
-
-        cursor.close();
-        return items;
+    public void deleteCartItem(Long cartItemId) {
+        Integer delete = database.delete(CartTable.TABLE_NAME, CartTable.ID + "=" + cartItemId.intValue(), null);
+        Log.e("rows affected:", delete.toString());
+        backupDB();
     }
 
     private class DataBaseOpenHelper extends SQLiteOpenHelper {

@@ -4,12 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.ListView;
 
-import com.myretail.myretail.Models.Item;
 import com.myretail.myretail.R;
 import com.myretail.myretail.adapter.MyCartAdapter;
 import com.myretail.myretail.db_helper.DataBaseHelper;
-
-import java.util.List;
 
 
 public class MyCartActivity extends Activity {
@@ -20,8 +17,12 @@ public class MyCartActivity extends Activity {
         setContentView(R.layout.my_cart);
 
         ListView myCartListView = (ListView)findViewById(R.id.myCartList);
-        List<Item> cartItems = DataBaseHelper.getInstance(this).getCartItems();
-        MyCartAdapter adapter = new MyCartAdapter(this, cartItems);
+
+        String[] from = {};
+        int[] to = {};
+
+        MyCartAdapter adapter = new MyCartAdapter(this, R.layout.my_cart, DataBaseHelper.getInstance(this).getCartCursor(), from, to);
+        adapter.notifyDataSetChanged();
         myCartListView.setAdapter(adapter);
     }
 }
