@@ -5,19 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.myretail.myretail.Models.Item;
-import com.myretail.myretail.R;
+import com.myretail.myretail.builder.CategoryBuilder;
+import com.myretail.myretail.builder.ItemBuilder;
 import com.myretail.myretail.tables.CartTable;
 import com.myretail.myretail.tables.CategoryTable;
 import com.myretail.myretail.tables.ItemTable;
-
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.myretail.myretail.db_helper.DatabaseManager.backupDB;
 import static com.myretail.myretail.db_helper.DatabaseManager.isBackupAvailable;
@@ -57,8 +52,7 @@ public class DataBaseHelper {
     }
 
     public Cursor getCategoriesCursor() {
-        String query = "SELECT * FROM " + CategoryTable.TABLE_NAME;
-        return database.rawQuery(query, null);
+        return database.rawQuery(CategoryTable.SELECT_QUERY, null);
     }
 
     public Cursor getItemsCursor(Long categoryId) {
@@ -96,46 +90,18 @@ public class DataBaseHelper {
         database.execSQL(ItemTable.DROP_QUERY);
         database.execSQL(ItemTable.CREATE_QUERY);
 
-        insertItem(1l, "T.V", "3000", "LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV LCD TV", imageToByteArray(R.drawable.tv), 10l);
-        insertItem(2l, "Microwave", "4000", "microwave", imageToByteArray(R.drawable.microwave), 10l);
-
-        insertItem(3l, "Chair", "1000", "Chair", imageToByteArray(R.drawable.chair), 20l);
-        insertItem(4l, "Table", "5000", "Table", imageToByteArray(R.drawable.table), 20l);
-
-        insertItem(5l, "T-Shirt", "800", "t-shirt", imageToByteArray(R.drawable.t_shirt), 30l);
-        insertItem(6l, "Jeans", "1500", "jeans", imageToByteArray(R.drawable.jeans), 30l);
-    }
-
-    private void insertItem(Long id, String name, String price, String detail, byte[] image, Long categoryId) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(ItemTable.NAME, name);
-        contentValues.put(ItemTable.ID, id);
-        contentValues.put(ItemTable.PRICE, price);
-        contentValues.put(ItemTable.DETAIL, detail);
-        contentValues.put(ItemTable.IMAGE, image);
-        contentValues.put(ItemTable.CATEGORY_ID, categoryId);
-
-        database.insert(ItemTable.TABLE_NAME, null, contentValues);
-    }
-
-    private byte[] imageToByteArray(int imageResource) {
-        Bitmap b = BitmapFactory.decodeResource(this.context.getResources(), imageResource);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        b.compress(Bitmap.CompressFormat.PNG, 100, bos);
-        return bos.toByteArray();
+        new ItemBuilder(database, this.context).build();
     }
 
     private void createAndSeedCategoriesTable() {
         database.execSQL(CategoryTable.DROP_QUERY);
         database.execSQL(CategoryTable.CREATE_QUERY);
 
-        database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(10, 'Electronics')");
-        database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(20, 'Furniture')");
-        database.execSQL("insert into " + CategoryTable.TABLE_NAME + " values(30, 'Clothes')");
+        new CategoryBuilder(database).seed().build();
     }
 
     public Cursor getCartCursor() {
-        return database.rawQuery("select * from " + CartTable.TABLE_NAME, null);
+        return database.rawQuery(CartTable.SELECT_QUERY, null);
     }
 
     public void deleteCartItem(Long cartItemId) {

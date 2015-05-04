@@ -12,4 +12,6 @@ public class CartTable {
                 + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + ITEM_ID + " INT"
                 + ")";
+
+    public static final String SELECT_QUERY = "select * from " + TABLE_NAME;
 }
