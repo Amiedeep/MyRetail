@@ -1,87 +1,116 @@
 package com.myretail.myretail.activities;
 
 
+import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ExpandableListView;
-import android.widget.SimpleCursorTreeAdapter;
+import android.view.ViewGroup;
 
 import com.myretail.myretail.R;
-import com.myretail.myretail.db_helper.DataBaseHelper;
-import com.myretail.myretail.tables.CategoryTable;
-import com.myretail.myretail.tables.ItemTable;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks{
 
-    private MyExpandableListAdapter listAdapter;
-    private ExpandableListView listView;
-    private DataBaseHelper dataBaseHelper;
+    private NavigationDrawerFragment mNavigationDrawerFragment;
+
+    private CharSequence mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        dataBaseHelper = DataBaseHelper.getInstance(this.getBaseContext());
-        dataBaseHelper.setUpDB();
+        mNavigationDrawerFragment = (NavigationDrawerFragment)getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mTitle = getTitle();
 
-        listView = (ExpandableListView) findViewById(R.id.categoryList);
-
-        String[] groupFrom = { CategoryTable.NAME };
-        int[] groupTo = { R.id.listHeader };
-
-        String[] childFrom = { ItemTable.NAME };
-        int[] childTo = { R.id.listItem };
-
-        Cursor categoriesCursor = dataBaseHelper.getCategoriesCursor();
-        categoriesCursor.moveToFirst();
-
-        listAdapter = new MyExpandableListAdapter(categoriesCursor, getApplicationContext(),
-                R.layout.list_group, R.layout.list_item, groupFrom, groupTo, childFrom, childTo);
-
-        listView.setAdapter(listAdapter);
-
-        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Context context = getApplicationContext();
-                Intent intent = new Intent(context, ProductDetailActivity.class).putExtra("itemId", id);
-                startActivity(intent);
-                return false;
-            }
-        });
-
-
-        Button myCartButton = (Button) findViewById(R.id.my_cart_button);
-
-        myCartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Context context = getApplicationContext();
-                Intent intent = new Intent(context, MyCartActivity.class);
-                startActivity(intent);
-            }
-        });
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
-    public class MyExpandableListAdapter extends SimpleCursorTreeAdapter {
-        public MyExpandableListAdapter(Cursor cursor, Context context,int groupLayout,
-                                       int childLayout, String[] groupFrom, int[] groupTo, String[] childrenFrom,
-                                       int[] childrenTo) {
-            super(context, cursor, groupLayout, groupFrom, groupTo,
-                    childLayout, childrenFrom, childrenTo);
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .commit();
+    }
+
+    public void onSectionAttached(int number) {
+        switch (number) {
+            case 1:
+                mTitle = "Electronics";
+                break;
+            case 2:
+                mTitle = "Furniture";
+                break;
+            case 3:
+                mTitle = "Clothes";
+                break;
+        }
+    }
+
+    public void restoreActionBar() {
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(mTitle);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+            restoreActionBar();
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public static class PlaceholderFragment extends Fragment {
+        private static final String ARG_SECTION_NUMBER = "section_number";
+
+        public static PlaceholderFragment newInstance(int sectionNumber) {
+            PlaceholderFragment fragment = new PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        public PlaceholderFragment() {
         }
 
         @Override
-        protected Cursor getChildrenCursor(Cursor groupCursor) {
-            Cursor childCursor = dataBaseHelper.getItemsCursor(groupCursor.getLong(groupCursor.getColumnIndex(CategoryTable.ID)));
-            childCursor.moveToFirst();
-            return childCursor;
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            return rootView;
+        }
+
+        @Override
+        public void onAttach(Activity activity) {
+            super.onAttach(activity);
+            ((MainActivity) activity).onSectionAttached(
+                    getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
 }
