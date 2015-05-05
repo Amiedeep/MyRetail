@@ -14,18 +14,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.myretail.myretail.R;
+import com.myretail.myretail.db_helper.DataBaseHelper;
 
 public class MainActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks{
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
     private CharSequence mTitle;
+    private DataBaseHelper dataBaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        dataBaseHelper = DataBaseHelper.getInstance(this.getApplicationContext());
+        dataBaseHelper.setUpDB();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
         mNavigationDrawerFragment = (NavigationDrawerFragment)getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
 
@@ -35,25 +38,15 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
+    public void onNavigationDrawerItemSelected(int position, Long id) {
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1, id))
                 .commit();
     }
 
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = "Electronics";
-                break;
-            case 2:
-                mTitle = "Furniture";
-                break;
-            case 3:
-                mTitle = "Clothes";
-                break;
-        }
+    public void onSectionAttached(Long id) {
+        mTitle = dataBaseHelper.getCategoryName(id);
     }
 
     public void restoreActionBar() {
@@ -87,11 +80,13 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
     public static class PlaceholderFragment extends Fragment {
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private static final String CATEGORY_ID = "category_id";
 
-        public static PlaceholderFragment newInstance(int sectionNumber) {
+        public static PlaceholderFragment newInstance(int sectionNumber, Long id) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putLong(CATEGORY_ID, id);
             fragment.setArguments(args);
             return fragment;
         }
@@ -109,8 +104,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+            ((MainActivity) activity).onSectionAttached(getArguments().getLong("category_id"));
         }
     }
 }

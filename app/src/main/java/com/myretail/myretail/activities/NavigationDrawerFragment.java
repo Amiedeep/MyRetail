@@ -3,8 +3,10 @@ package com.myretail.myretail.activities;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -17,28 +19,31 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.myretail.myretail.R;
+import com.myretail.myretail.db_helper.DataBaseHelper;
+import com.myretail.myretail.tables.CategoryTable;
 
 public class NavigationDrawerFragment extends Fragment {
-
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
+    private static final String CATEGORY_ID = "category_id";
 
     private NavigationDrawerCallbacks mCallbacks;
 
     private ActionBarDrawerToggle mDrawerToggle;
-
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
-    private View mFragmentContainerView;
 
+    private View mFragmentContainerView;
     private int mCurrentSelectedPosition = 0;
+    private Long mCurrentSelectedCategory = 0l;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private DataBaseHelper dataBaseHelper;
 
     public NavigationDrawerFragment() {
     }
@@ -52,10 +57,9 @@ public class NavigationDrawerFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
+            mCurrentSelectedCategory = savedInstanceState.getLong(CATEGORY_ID);
             mFromSavedInstanceState = true;
         }
-
-        selectItem(mCurrentSelectedPosition);
     }
 
     @Override
@@ -72,16 +76,17 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
+                selectItem(position, id);
             }
         });
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActivity().getApplicationContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                new String[]{
-                        "Electronics","Furniture","Clothes"
-                }));
+
+        String[] from = {CategoryTable.NAME};
+        int[] to = {R.id.listItem};
+
+        dataBaseHelper = DataBaseHelper.getInstance(getActivity());
+        Cursor categoriesCursor = dataBaseHelper.getCategoriesCursor();
+        CategoryListAdapter categoryListAdapter = new CategoryListAdapter(getActivity(), R.layout.list_item, categoriesCursor, from, to);
+        mDrawerListView.setAdapter(categoryListAdapter);
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
     }
@@ -106,6 +111,7 @@ public class NavigationDrawerFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
+        outState.putLong(CATEGORY_ID, mCurrentSelectedCategory);
     }
 
     @Override
@@ -207,8 +213,9 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    private void selectItem(int position) {
+    private void selectItem(int position, Long id) {
         mCurrentSelectedPosition = position;
+        mCurrentSelectedCategory = id;
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
         }
@@ -216,7 +223,7 @@ public class NavigationDrawerFragment extends Fragment {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }
         if (mCallbacks != null) {
-            mCallbacks.onNavigationDrawerItemSelected(position);
+            mCallbacks.onNavigationDrawerItemSelected(position, id);
         }
     }
 
@@ -226,6 +233,16 @@ public class NavigationDrawerFragment extends Fragment {
 
 
     public static interface NavigationDrawerCallbacks {
-        void onNavigationDrawerItemSelected(int position);
+        void onNavigationDrawerItemSelected(int position, Long id);
+    }
+
+
+    public class CategoryListAdapter extends SimpleCursorAdapter {
+        private Context context;
+
+        public CategoryListAdapter(Context context, int layout, Cursor c, String[] from, int[] to) {
+            super(context, layout, c, from, to);
+            this.context = context;
+        }
     }
 }

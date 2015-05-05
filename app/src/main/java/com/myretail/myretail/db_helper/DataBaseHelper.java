@@ -55,10 +55,6 @@ public class DataBaseHelper {
         return database.rawQuery(CategoryTable.SELECT_QUERY, null);
     }
 
-    public Cursor getItemsCursor(Long categoryId) {
-        return database.query(ItemTable.TABLE_NAME, ItemTable.ALL_COLUMNS, ItemTable.CATEGORY_ID + "=" + categoryId.intValue(), null, null, null, null, null);
-    }
-
     public Item getItem(Long id) {
         Cursor item = database.query(ItemTable.TABLE_NAME, ItemTable.ALL_COLUMNS, ItemTable.ID + "=" + id.intValue(), null, null, null, null, null);
         if (item == null) return null;
@@ -108,6 +104,16 @@ public class DataBaseHelper {
         Integer delete = database.delete(CartTable.TABLE_NAME, CartTable.ID + "=" + cartItemId.intValue(), null);
         Log.e("rows affected:", delete.toString());
         backupDB();
+    }
+
+    public String getCategoryName(Long id) {
+        Cursor category = database.query(CategoryTable.TABLE_NAME, new String[]{CategoryTable.NAME}, CategoryTable.ID + "=" + id, null, null, null, null, null);
+        if(category == null || category.getCount() == 0) return "";
+
+        category.moveToFirst();
+        String categoryName = category.getString(category.getColumnIndex(CategoryTable.NAME));
+        category.close();
+        return categoryName;
     }
 
     private class DataBaseOpenHelper extends SQLiteOpenHelper {
